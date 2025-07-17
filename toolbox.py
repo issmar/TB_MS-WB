@@ -30,8 +30,8 @@ from urllib.parse import urlparse
 smtp_server = "smtp.gmail.com"
 smtp_port = 587
 imap_server = "imap.gmail.com"
-tu_correo = ""
-tu_password = ""
+tu_correo = "ventas.niflor2@gmail.com"
+tu_password = "hdjk lwmq mvbf qjdo"
 ruta_excel = "correos.xlsx"
 nombre_archivo_pdf = "ejemplo.pdf"
 chromedriver_path = "chromedriver.exe"
