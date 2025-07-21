@@ -5,9 +5,17 @@ from openpyxl import load_workbook
 from openpyxl.styles import Font
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.application import MIMEApplication
 
 def enviar_correos(usuario_email, usuario_password):
     carpeta = "./Generados"
+    pdf_filename = "NIFLOR.pdf"
+    pdf_path = os.path.abspath(pdf_filename)
+
+    if not os.path.isfile(pdf_path):
+        print(f"❌ El archivo PDF '{pdf_filename}' no fue encontrado.")
+        return
+
     archivos = [f for f in os.listdir(carpeta) if f.endswith(".xlsx")]
 
     if not archivos:
@@ -80,10 +88,30 @@ def enviar_correos(usuario_email, usuario_password):
             mensaje = MIMEMultipart()
             mensaje["From"] = usuario_email
             mensaje["To"] = correo
-            mensaje["Subject"] = "Correo de prueba"
-            cuerpo = MIMEText("Este es un correo de prueba enviado automáticamente.", "plain")
+            mensaje["Subject"] = "NIFLOR: Servicio de confianza / 4 tractos servicio full"
+
+            cuerpo_html = """
+            <b>🚛 BASE EN ALTAMIRA, TAMPS.</b><br>
+            <b>4 TRACTOCAMIONES CON SERVICIO FULL, DISPONIBLES</b><br><br>
+            ¿Tienes cargas que no se están moviendo por falta de transporte?<br><br>
+            Formada por personas trabajadoras y de confianza, con rutas activas a <b>Nuevo León, San Luis Potosí, Jalisco, Coahuila y Tamaulipas</b>.<br><br>
+            Somos una empresa nueva y al tener una flotilla pequeña, podemos darte <b>atención personalizada, disponibilidad inmediata y seguimiento puntual</b>.<br><br>
+            ¿Te molesta si cotizamos alguno de tus requerimientos?<br><br>
+            Saludos,<br>
+            <b>Enrique Delgado</b><br>
+            <b>833 236 66 62</b>
+            """
+
+            cuerpo = MIMEText(cuerpo_html, "html")
             mensaje.attach(cuerpo)
 
+            # Adjuntar el PDF
+            with open(pdf_path, "rb") as archivo_pdf:
+                parte_pdf = MIMEApplication(archivo_pdf.read(), _subtype="pdf")
+                parte_pdf.add_header("Content-Disposition", "attachment", filename=pdf_filename)
+                mensaje.attach(parte_pdf)
+
+            # Enviar correo
             with smtplib.SMTP("smtp.gmail.com", 587) as server:
                 server.starttls()
                 server.login(usuario_email, usuario_password)
