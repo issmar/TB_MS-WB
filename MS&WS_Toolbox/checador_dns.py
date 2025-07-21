@@ -2,8 +2,54 @@ import os
 import socket
 import shutil
 import pandas as pd
+import re
 from openpyxl import load_workbook
 from openpyxl.styles import Font, Color
+
+def validar_dominio(dominio):
+    """Valida si un dominio está bien formado antes de intentar resolverlo."""
+    if not dominio or not isinstance(dominio, str):
+        return False
+    
+    # Limpiar el dominio
+    dominio = dominio.strip().lower()
+    
+    # Verificar que no esté vacío después de limpiar
+    if not dominio:
+        return False
+    
+    # Verificar que no tenga puntos consecutivos
+    if '..' in dominio:
+        return False
+    
+    # Verificar que no empiece o termine con punto
+    if dominio.startswith('.') or dominio.endswith('.'):
+        return False
+    
+    # Verificar que no tenga caracteres especiales no permitidos
+    # Solo permitir letras, números, puntos y guiones
+    if not re.match(r'^[a-zA-Z0-9.-]+$', dominio):
+        return False
+    
+    # Verificar que tenga al menos un punto (para ser un dominio válido)
+    if '.' not in dominio:
+        return False
+    
+    # Verificar que no tenga guiones al inicio o final de cada etiqueta
+    etiquetas = dominio.split('.')
+    for etiqueta in etiquetas:
+        if not etiqueta:  # Etiqueta vacía
+            return False
+        if etiqueta.startswith('-') or etiqueta.endswith('-'):
+            return False
+        if len(etiqueta) > 63:  # Máximo 63 caracteres por etiqueta
+            return False
+    
+    # Verificar longitud total del dominio
+    if len(dominio) > 253:
+        return False
+    
+    return True
 
 def ejecutar_checador_dns():
     # Configurar colores
@@ -72,6 +118,15 @@ def ejecutar_checador_dns():
             continue
 
         dominio = str(email).strip().split("@")[-1].lower()
+        
+        # Validar si el dominio está bien formado
+        if not validar_dominio(dominio):
+            ws.cell(row=row, column=col_estado).value = "Dominio malformado"
+            ws.cell(row=row, column=col_estado).font = Font(color=Color(rgb=rojo))
+            print(f"⚠️ {dominio}: Dominio malformado")
+            wb.save(ruta_archivo)
+            continue
+        
         try:
             socket.gethostbyname(dominio)
             ws.cell(row=row, column=col_estado).value = "Existe"
@@ -81,6 +136,14 @@ def ejecutar_checador_dns():
             ws.cell(row=row, column=col_estado).value = "No existe"
             ws.cell(row=row, column=col_estado).font = Font(color=Color(rgb=rojo))
             print(f"❌ {dominio}: No existe")
+        except UnicodeError as e:
+            ws.cell(row=row, column=col_estado).value = "Error de codificación"
+            ws.cell(row=row, column=col_estado).font = Font(color=Color(rgb=rojo))
+            print(f"⚠️ {dominio}: Error de codificación - {str(e)}")
+        except Exception as e:
+            ws.cell(row=row, column=col_estado).value = "Error desconocido"
+            ws.cell(row=row, column=col_estado).font = Font(color=Color(rgb=rojo))
+            print(f"⚠️ {dominio}: Error desconocido - {str(e)}")
 
         # Guardar después de procesar cada fila
         wb.save(ruta_archivo)

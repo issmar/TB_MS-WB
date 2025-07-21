@@ -17,7 +17,7 @@ def enviar_mensajes_wa():
 
     FOLDER = "./Generados"
     CHROMEDRIVER_PATH = "chromedriver.exe"
-    PROFILE_PATH = "user-data-dir=C:/Users/ALPHA_PC/AppData/Local/Google/Chrome/User Data/WhatsappProfile"
+    PROFILE_PATH = "user-data-dir=C:/Users/angel/AppData/Local/Google/Chrome/User Data/WhatsappProfile"
     WA_URL = "https://web.whatsapp.com/"
 
     verde = Font(color="FF008000")

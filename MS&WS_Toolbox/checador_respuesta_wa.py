@@ -11,7 +11,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 
 def verificar_respuestas_wa():
-    CHROME_PROFILE_PATH = "C:/Users/ALPHA_PC/AppData/Local/Google/Chrome/User Data/WhatsappProfile"
+    CHROME_PROFILE_PATH = "C:/Users/angel/AppData/Local/Google/Chrome/User Data/WhatsappProfile"
     CHROMEDRIVER_PATH = "chromedriver.exe"
     FOLDER = "./Generados"
 
