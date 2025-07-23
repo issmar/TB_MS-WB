@@ -1,5 +1,6 @@
 import os
 import time
+import urllib.parse
 from openpyxl import load_workbook
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -46,6 +47,18 @@ def enviar_mensajes_wa():
         print(f"❌ No se pudo iniciar WhatsApp Web: {e}")
         return
 
+    mensaje = (
+        "Te escribimos de NIFLOR.\n"
+        "🚛 BASE EN ALTAMIRA, TAMPS.\n"
+        "4 TRACTOCAMIONES FULL disponibles.\n"
+        "¿Tienes cargas que no se están moviendo por falta de transporte?\n\n"
+        "Somos personas trabajadoras y de confianza, con rutas activas a Nuevo León, San Luis Potosí, Jalisco, Coahuila y Tamaulipas.\n"
+        "Empresa nueva, flotilla pequeña = atención personalizada, disponibilidad inmediata y seguimiento puntual.\n\n"
+        "¿Te molesta si cotizamos alguno de tus requerimientos?\n\n"
+        "Saludos,\nEnrique Delgado\n833 236 66 62"
+    )
+    mensaje_url = urllib.parse.quote(mensaje)
+
     for fila in range(2, ws.max_row + 1):
         celda_tel = ws.cell(row=fila, column=col_tel)
         celda_envio = ws.cell(row=fila, column=col_envio_wa)
@@ -67,7 +80,7 @@ def enviar_mensajes_wa():
         if not telefono.startswith("52"):
             telefono = "521" + telefono
 
-        enlace = f"https://web.whatsapp.com/send?phone={telefono}&text=Hola"
+        enlace = f"https://web.whatsapp.com/send?phone={telefono}&text={mensaje_url}"
         driver.get(enlace)
         time.sleep(5)
 
