@@ -9,7 +9,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-def enviar_mensajes_wa():
+def enviar_mensajes_wa(limite_envios):
     RUTA_EXCEL = "./GENERADOS/contactos_filtrados.xlsx"
     CHROMEDRIVER_PATH = "chromedriver.exe"
     PROFILE_PATH = "user-data-dir=C:/Users/ALPHA_PC/AppData/Local/Google/Chrome/User Data/WhatsappProfile"
@@ -59,7 +59,13 @@ def enviar_mensajes_wa():
     )
     mensaje_url = urllib.parse.quote(mensaje)
 
+    enviados = 0
+
     for fila in range(2, ws.max_row + 1):
+        if enviados >= limite_envios:
+            print(f"\n🛑 Límite de envíos alcanzado: {limite_envios}")
+            break
+
         celda_tel = ws.cell(row=fila, column=col_tel)
         celda_envio = ws.cell(row=fila, column=col_envio_wa)
         celda_resp = ws.cell(row=fila, column=col_resp_wa)
@@ -91,7 +97,8 @@ def enviar_mensajes_wa():
             boton_enviar.click()
             celda_envio.value = "Enviado"
             celda_resp.value = "Pendiente"
-            print(f"✅ Fila {fila}: Mensaje enviado a {telefono}")
+            enviados += 1
+            print(f"✅ Fila {fila}: Mensaje enviado a {telefono} ({enviados}/{limite_envios})")
         except Exception:
             celda_envio.value = "No Existe"
             celda_resp.value = "No Aplica"
@@ -101,7 +108,15 @@ def enviar_mensajes_wa():
         time.sleep(2)
 
     driver.quit()
-    print(f"\n✅ Proceso finalizado y archivo actualizado: contactos_filtrados.xlsx")
+    print(f"\n✅ Proceso finalizado. Total enviados: {enviados} / {limite_envios}")
+    print("📄 Archivo actualizado: contactos_filtrados.xlsx")
 
 if __name__ == "__main__":
-    enviar_mensajes_wa()
+    try:
+        cantidad = int(input("🔢 ¿Cuántos mensajes de WhatsApp deseas enviar?: "))
+        if cantidad <= 0:
+            print("❌ Debes ingresar un número mayor a cero.")
+        else:
+            enviar_mensajes_wa(cantidad)
+    except ValueError:
+        print("❌ Entrada inválida. Ingresa un número entero.")
